@@ -33,9 +33,10 @@ jobs:
           submodules: recursive
 
       - name: Setup Vulkan SDK
-        uses: herleb/install-vulkan-sdk-action@v1.2.0
-        with:
-          version: '1.3.268.0'
+        run: |
+          choco install vulkan-sdk -y
+          echo "VULKAN_SDK=C:\VulkanSDK" >> $GITHUB_ENV
+          echo "C:\VulkanSDK\Bin" >> $GITHUB_PATH
           
       - name: Install dependencies
         run: vcpkg install glfw3 glew sdl2 libtheora libogg --triplet=x86-windows-static
@@ -67,9 +68,10 @@ jobs:
           submodules: recursive
 
       - name: Setup Vulkan SDK
-        uses: herleb/install-vulkan-sdk-action@v1.2.0
-        with:
-          version: '1.3.268.0'
+        run: |
+          choco install vulkan-sdk -y
+          echo "VULKAN_SDK=C:\VulkanSDK" >> $GITHUB_ENV
+          echo "C:\VulkanSDK\Bin" >> $GITHUB_PATH
           
       - name: Install dependencies
         run: vcpkg install glfw3 glew sdl2 libtheora libogg --triplet=x64-windows-static
