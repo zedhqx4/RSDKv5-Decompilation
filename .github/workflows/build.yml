@@ -1,6 +1,7 @@
 name: Build RSDKv5 + U
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - android/**
@@ -14,7 +15,7 @@ on:
       - master
 
 env:
-  GENERAL_FLAGS: "-DRETRO_DISABLE_PLUS=ON -DCMAKE_BUILD_TYPE=Release"
+  GENERAL_FLAGS: "-DRETRO_SUBSYSTEM=VK -DRETRO_DISABLE_PLUS=off -DCMAKE_BUILD_TYPE=Release"
   V5_FLAGS: "-DRETRO_REVISION=2"
   V5U_FLAGS: "-DRETRO_REVISION=3"
   # Normally you would use $VCPKG_INSTALLATION_PATH, but it's broken...so hardcode C:/vcpkg
