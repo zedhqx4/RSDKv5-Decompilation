@@ -15,7 +15,7 @@ on:
       - master
 
 env:
-  GENERAL_FLAGS: "-DRETRO_SUBSYSTEM=VK -DRETRO_DISABLE_PLUS=off -DCMAKE_BUILD_TYPE=Release"
+  GENERAL_FLAGS: "-DRETRO_SUBSYSTEM=OGL -DRETRO_DISABLE_PLUS=off -DCMAKE_BUILD_TYPE=Release"
   V5_FLAGS: "-DRETRO_REVISION=2"
   V5U_FLAGS: "-DRETRO_REVISION=3"
   # Normally you would use $VCPKG_INSTALLATION_PATH, but it's broken...so hardcode C:/vcpkg
@@ -34,10 +34,10 @@ jobs:
           submodules: recursive
 
   # Instala el SDK de Vulkan oficial en la máquina virtual
-      - name: Setup Vulkan SDK
-        uses: herleb/install-vulkan-sdk-action@v1.2.0
-        with:
-          version: '1.3.268.0' # Una versión estable y compatible
+  #   - name: Setup Vulkan SDK
+  #     uses: herleb/install-vulkan-sdk-action@v1.2.0
+  #     with:
+  #       version: '1.3.268.0' # Una versión estable y compatible
           
       - name: Install dependencies
         run: vcpkg install glfw3 glew sdl2 libtheora libogg --triplet=x86-windows-static
@@ -65,10 +65,10 @@ jobs:
           submodules: recursive
 
   # Instala el SDK de Vulkan oficial en la máquina virtual
-      - name: Setup Vulkan SDK
-        uses: herleb/install-vulkan-sdk-action@v1.2.0
-        with:
-          version: '1.3.268.0' # Una versión estable y compatible
+  #    - name: Setup Vulkan SDK
+  #     uses: herleb/install-vulkan-sdk-action@v1.2.0
+  #     with:
+  #        version: '1.3.268.0' # Una versión estable y compatible
           
       - name: Install dependencies
         run: vcpkg install glfw3 glew sdl2 libtheora libogg --triplet=x64-windows-static
