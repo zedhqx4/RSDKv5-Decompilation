@@ -15,10 +15,9 @@ on:
       - master
 
 env:
-  GENERAL_FLAGS: "-DRETRO_SUBSYSTEM=SDL2 -DRETRO_DISABLE_PLUS=off -DCMAKE_BUILD_TYPE=Release"
+  GENERAL_FLAGS: "-DRETRO_SUBSYSTEM=VK -DRETRO_DISABLE_PLUS=off -DCMAKE_BUILD_TYPE=Release"
   V5_FLAGS: "-DRETRO_REVISION=2"
   V5U_FLAGS: "-DRETRO_REVISION=3"
-  # Normally you would use $VCPKG_INSTALLATION_PATH, but it's broken...so hardcode C:/vcpkg
   GENERAL_WIN_FLAGS: "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
   WIN32_FLAGS: "-DVCPKG_TARGET_TRIPLET=x86-windows-static -A Win32"
   WIN64_FLAGS: "-DVCPKG_TARGET_TRIPLET=x64-windows-static"
@@ -33,29 +32,32 @@ jobs:
         with:
           submodules: recursive
 
-  # Instala el SDK de Vulkan oficial en la máquina virtual
-  #   - name: Setup Vulkan SDK
-  #     uses: herleb/install-vulkan-sdk-action@v1.2.0
-  #     with:
-  #       version: '1.3.268.0' # Una versión estable y compatible
+      - name: Setup Vulkan SDK
+        uses: herleb/install-vulkan-sdk-action@v1.2.0
+        with:
+          version: '1.3.268.0'
           
       - name: Install dependencies
         run: vcpkg install glfw3 glew sdl2 libtheora libogg --triplet=x86-windows-static
+
       - name: Build RSDKv5 + U
         run: |
           cmake -B build_v5 ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}} ${{env.V5_FLAGS}}
           cmake --build build_v5 --parallel --config Release
           cmake -B build_v5U ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}} ${{env.V5U_FLAGS}}
           cmake --build build_v5U --parallel --config Release
+
       - name: Move artifacts
         run: |
           mkdir artifacts
           mv ./build_*/Release/*.exe ./artifacts
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: v5-windows
           path: artifacts
+
   v5-windows-x64:
     runs-on: windows-latest
     steps:
@@ -64,29 +66,32 @@ jobs:
         with:
           submodules: recursive
 
-  # Instala el SDK de Vulkan oficial en la máquina virtual
-  #    - name: Setup Vulkan SDK
-  #     uses: herleb/install-vulkan-sdk-action@v1.2.0
-  #     with:
-  #        version: '1.3.268.0' # Una versión estable y compatible
+      - name: Setup Vulkan SDK
+        uses: herleb/install-vulkan-sdk-action@v1.2.0
+        with:
+          version: '1.3.268.0'
           
       - name: Install dependencies
         run: vcpkg install glfw3 glew sdl2 libtheora libogg --triplet=x64-windows-static
+
       - name: Build RSDKv5 + U
         run: |
           cmake -B build_v5 ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}} ${{env.V5_FLAGS}}
           cmake --build build_v5 --parallel --config Release
           cmake -B build_v5U ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}} ${{env.V5U_FLAGS}}
           cmake --build build_v5U --parallel --config Release
+
       - name: Move artifacts
         run: |
           mkdir artifacts
           mv ./build_*/Release/*.exe ./artifacts
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: v5-windows-x64
           path: artifacts
+
   v5-linux:
     runs-on: ubuntu-latest
     steps:
@@ -94,28 +99,31 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install libogg-dev libtheora-dev libglew-dev libglfw3-dev
+
       - name: Build RSDKv5 + U OGL
         run: |
-          cmake -B build_v5 ${{env.GENERAL_FLAGS}} ${{env.GENERAL_LINUX_FLAGS}} ${{env.V5_FLAGS}}
+          cmake -B build_v5 ${{env.GENERAL_FLAGS}} ${{env.GENERAL_LINUX_FLAGS}} ${{env.V5_FLAGS}} -DRETRO_SUBSYSTEM=OGL
           cmake --build build_v5 --parallel
-          cmake -B build_v5U ${{env.GENERAL_FLAGS}} ${{env.GENERAL_LINUX_FLAGS}} ${{env.V5U_FLAGS}}
+          cmake -B build_v5U ${{env.GENERAL_FLAGS}} ${{env.GENERAL_LINUX_FLAGS}} ${{env.V5U_FLAGS}} -DRETRO_SUBSYSTEM=OGL
           cmake --build build_v5U --parallel
-      # tar the executables so that they don't lose exec permissions
-      # see: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
+
       - name: Move artifacts
         run: |
           mkdir artifacts
           mv ./build_*/RSDKv5* ./artifacts
           tar -czvf linux.tar.gz -C ./artifacts .
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: v5-linux
           path: linux.tar.gz
+
   v5-android:
     runs-on: ubuntu-latest
     steps:
@@ -123,21 +131,25 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Checkout Sonic Mania
         uses: actions/checkout@v4
         with:
           repository: "RSDKModding/Sonic-Mania-Decompilation"
           path: "Sonic-Mania-Decompilation"
+
       - name: Checkout Example-Mods
         uses: actions/checkout@v4
         with:
           repository: "RSDKModding/RSDKv5-Example-Mods"
           path: "RSDKv5-Example-Mods"
+
       - name: Checkout GameAPI
         uses: actions/checkout@v4
         with:
           repository: "RSDKModding/RSDKv5-GameAPI"
           path: "RSDKv5-GameAPI"
+
       - name: Setup RSDKv5 dependencies
         working-directory: ./dependencies/android
         run: |
@@ -147,6 +159,7 @@ jobs:
           rm *.zip
           rsync -ar libogg-*/* libogg
           mv libtheora-* libtheora
+
       - name: Setup RSDKv5 & mods symlinks
         run: |
           rm Game
@@ -157,21 +170,25 @@ jobs:
           ln -s $PWD/Sonic-Mania-Decompilation ./android/app/jni/Game
           ln -s $PWD/RSDKv5-Example-Mods/ManiaTouchControls ./android/app/jni/MTC
           ln -s $PWD/RSDKv5-Example-Mods/UltrawideMania ./android/app/jni/UWM
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+
       - name: Build Mania+RSDKv5 Android
         working-directory: ./android
         run: |
           ./gradlew assemble --no-daemon -PABIFILTERS="armeabi-v7a;arm64-v8a" -PRETRO_DISABLE_PLUS -PRETRO_REVISION=3
           mv app/build/outputs/apk/release/*.apk rsdkv5u_mania.apk
           ./gradlew clean
-          ./gradlew  assemble --no-daemon -PABIFILTERS="armeabi-v7a;arm64-v8a" -PRETRO_DISABLE_PLUS -PRETRO_REVISION=2
+          ./gradlew assemble --no-daemon -PABIFILTERS="armeabi-v7a;arm64-v8a" -PRETRO_DISABLE_PLUS -PRETRO_REVISION=2
           mv app/build/outputs/apk/release/*.apk rsdkv5_mania.apk
+
       - name: Bundle APK & mods
         run: |
           mkdir -p artifacts/mods
@@ -184,9 +201,10 @@ jobs:
           cp -r RSDKv5/Shaders/OGL artifacts/mods/GLShaders/Data/Shaders
           printf "Name=GLShaders\nDescription=OGLShaders\nAuthor=Ducky\nVersion=1.0.0\nTargetVersion=-1\n" > artifacts/mods/GLShaders/mod.ini
           printf "[Mods]\nMTC=y\nUWM=y\nGLShaders=y\n" > artifacts/mods/modconfig.ini
-      # HACK: Remove RSDKv5 symlink in Mania to prevent warning in post checkout cleanup
+
       - name: Cleanup
         run: rm $PWD/Sonic-Mania-Decompilation/dependencies/RSDKv5
+
       - name: Upload artifact Android
         uses: actions/upload-artifact@v4
         with:
