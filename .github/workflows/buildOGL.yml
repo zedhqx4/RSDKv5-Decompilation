@@ -32,19 +32,14 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Vulkan SDK
-        run: |
-          choco install vulkan-sdk -y
-          
       - name: Install dependencies
-        run: vcpkg install glfw3 glew sdl2 libtheora libogg --triplet=x86-windows-static
+        run: vcpkg install glfw3 glew sdl2 libtheora libogg vulkan --triplet=x86-windows-static
 
       - name: Build RSDKv5 + U
-        # Forzamos los paths de Vulkan x86 directamente en los argumentos de CMake
         run: |
-          cmake -B build_v5 ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}} ${{env.V5_FLAGS}} -DVulkan_INCLUDE_DIR="C:/VulkanSDK/Include" -DVulkan_LIBRARY="C:/VulkanSDK/Lib/vulkan-1.lib"
+          cmake -B build_v5 ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}} ${{env.V5_FLAGS}}
           cmake --build build_v5 --parallel --config Release
-          cmake -B build_v5U ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}} ${{env.V5U_FLAGS}} -DVulkan_INCLUDE_DIR="C:/VulkanSDK/Include" -DVulkan_LIBRARY="C:/VulkanSDK/Lib/vulkan-1.lib"
+          cmake -B build_v5U ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}} ${{env.V5U_FLAGS}}
           cmake --build build_v5U --parallel --config Release
 
       - name: Move artifacts
@@ -66,19 +61,14 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Vulkan SDK
-        run: |
-          choco install vulkan-sdk -y
-          
       - name: Install dependencies
-        run: vcpkg install glfw3 glew sdl2 libtheora libogg --triplet=x64-windows-static
+        run: vcpkg install glfw3 glew sdl2 libtheora libogg vulkan --triplet=x64-windows-static
 
       - name: Build RSDKv5 + U
-        # Forzamos los paths de Vulkan x64 directamente en los argumentos de CMake
         run: |
-          cmake -B build_v5 ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}} ${{env.V5_FLAGS}} -DVulkan_INCLUDE_DIR="C:/VulkanSDK/Include" -DVulkan_LIBRARY="C:/VulkanSDK/Lib/vulkan-1.lib"
+          cmake -B build_v5 ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}} ${{env.V5_FLAGS}}
           cmake --build build_v5 --parallel --config Release
-          cmake -B build_v5U ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}} ${{env.V5U_FLAGS}} -DVulkan_INCLUDE_DIR="C:/VulkanSDK/Include" -DVulkan_LIBRARY="C:/VulkanSDK/Lib/vulkan-1.lib"
+          cmake -B build_v5U ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}} ${{env.V5U_FLAGS}}
           cmake --build build_v5U --parallel --config Release
 
       - name: Move artifacts
